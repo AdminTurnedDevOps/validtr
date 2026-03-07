@@ -2,7 +2,7 @@
 
 ```mermaid
 ---
-title: "AgentForge - Agentic Stack Recommender & End-to-End Tester"
+title: "validtr - Agentic Stack Recommender & End-to-End Tester"
 ---
 
 flowchart TB
