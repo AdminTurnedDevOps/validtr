@@ -53,3 +53,73 @@
 .vp-doc a:hover {
   text-decoration-color: rgba(33, 199, 232, 1);
 }
+
+.landing-grid {
+  display: grid;
+  gap: 14px;
+  margin: 14px 0 22px;
+}
+
+.landing-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.landing-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.landing-card {
+  display: block;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(33, 199, 232, 0.2);
+  background: linear-gradient(160deg, rgba(19, 33, 53, 0.9), rgba(10, 18, 31, 0.88));
+  text-decoration: none !important;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.landing-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(33, 199, 232, 0.5);
+  box-shadow: 0 8px 26px rgba(33, 199, 232, 0.12);
+}
+
+.landing-card h3 {
+  margin: 4px 0 6px;
+  color: var(--vp-c-text-1);
+}
+
+.landing-card p {
+  margin: 0;
+  color: var(--vp-c-text-2);
+}
+
+.landing-eyebrow {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--vp-c-brand-1) !important;
+}
+
+.landing-card-compact {
+  padding: 13px 14px;
+}
+
+.landing-note {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-left: 3px solid rgba(33, 199, 232, 0.8);
+  border-radius: 8px;
+  background: rgba(33, 199, 232, 0.08);
+}
+
+.landing-note p {
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .landing-grid-2,
+  .landing-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
