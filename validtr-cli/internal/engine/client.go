@@ -30,6 +30,8 @@ type StackInfo struct {
 	Model           string   `json:"model"`
 	Framework       *string  `json:"framework"`
 	MCPServers      []string `json:"mcp_servers"`
+	Skills          []string `json:"skills"`
+	PromptStrategy  string   `json:"prompt_strategy"`
 	AdjustmentNotes []string `json:"adjustment_notes"`
 }
 

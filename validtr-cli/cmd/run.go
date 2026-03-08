@@ -194,6 +194,14 @@ func printResult(result *engine.RunResult) {
 	if len(result.Stack.MCPServers) > 0 {
 		fmt.Printf("│    MCP:       %s\n", strings.Join(result.Stack.MCPServers, ", "))
 	}
+	if len(result.Stack.Skills) > 0 {
+		fmt.Printf("│    Skills:    %s\n", strings.Join(result.Stack.Skills, ", "))
+	}
+	if result.Stack.PromptStrategy != "" {
+		fmt.Println("│")
+		fmt.Println("│  Prompt Strategy")
+		fmt.Printf("│    %s\n", truncate(result.Stack.PromptStrategy, 96))
+	}
 
 	// Validation score with breakdown
 	fmt.Println("│")
@@ -217,6 +225,9 @@ func printResult(result *engine.RunResult) {
 			fmt.Printf("│   %s #%d  %.0f/100  %s/%s\n", marker, a.AttemptNumber, a.Score, a.Stack.Provider, a.Stack.Model)
 			if len(a.Stack.MCPServers) > 0 {
 				fmt.Printf("│          MCP: %s\n", strings.Join(a.Stack.MCPServers, ", "))
+			}
+			if len(a.Stack.Skills) > 0 {
+				fmt.Printf("│          Skills: %s\n", strings.Join(a.Stack.Skills, ", "))
 			}
 			for _, note := range a.AdjustmentNotes {
 				fmt.Printf("│          -> %s\n", note)

@@ -1,6 +1,5 @@
 """Recommendation Engine — orchestrates web search, MCP registry, and LLM reasoning."""
 
-import asyncio
 import logging
 
 from models.stack import StackRecommendation
@@ -34,17 +33,19 @@ class RecommendationEngine:
         """Generate a stack recommendation for the given task."""
         logger.info("Generating recommendation for task: %s", task.id)
 
-        # Build search queries from task
-        search_query = f"best {task.type.value} tools for {task.domain} {' '.join(task.requirements.frameworks)}"
-        mcp_query = " ".join(task.requirements.capabilities[:3]) if task.requirements.capabilities else task.domain
+        # Build a targeted search query from task
+        frameworks = " ".join(task.requirements.frameworks) if task.requirements.frameworks else ""
+        search_query = f"best practices {task.type.value} {task.domain} {frameworks}".strip()
 
-        # Run web search and MCP registry lookup in parallel
-        web_results, mcp_servers = await asyncio.gather(
-            self.web_search.search(search_query),
-            self.mcp_registry.search(mcp_query, task.requirements.capabilities),
-        )
+        # Web search for best practices; give the LLM ALL curated MCP servers
+        # so it can reason about which ones help for this task
+        web_results_list = await self.web_search.search(search_query)
+        all_mcp_servers = self.mcp_registry.get_all()
 
-        logger.info("Web search: %d results, MCP registry: %d servers", len(web_results), len(mcp_servers))
+        logger.info("Web search: %d results, MCP registry: %d servers available", len(web_results_list), len(all_mcp_servers))
+
+        web_results = web_results_list
+        mcp_servers = all_mcp_servers
 
         # Use LLM to synthesize into a recommendation
         recommendation = await self.llm_reasoning.recommend(
@@ -53,7 +54,6 @@ class RecommendationEngine:
             mcp_servers=mcp_servers,
             preferred_provider=preferred_provider,
         )
-
         logger.info(
             "Recommended: %s/%s, %d MCP servers",
             recommendation.llm.provider,

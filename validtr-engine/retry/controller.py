@@ -70,6 +70,8 @@ class RetryController:
                 model=stack.llm.model,
                 framework=stack.framework.name,
                 mcp_servers=[s.name for s in stack.mcp_servers],
+                skills=stack.skills,
+                prompt_strategy=stack.prompt_strategy,
                 adjustment_notes=stack.adjustment_notes,
             )
         self.attempts.append(AttemptResult(

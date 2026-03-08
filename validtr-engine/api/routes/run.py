@@ -3,7 +3,7 @@
 import logging
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from analyzer.task_analyzer import TaskAnalyzer
 from orchestrator import run_task
@@ -37,16 +37,18 @@ class StackResponse(BaseModel):
     provider: str = ""
     model: str = ""
     framework: str | None = None
-    mcp_servers: list[str] = []
-    adjustment_notes: list[str] = []
+    mcp_servers: list[str] = Field(default_factory=list)
+    skills: list[str] = Field(default_factory=list)
+    prompt_strategy: str = ""
+    adjustment_notes: list[str] = Field(default_factory=list)
 
 
 class AttemptResponse(BaseModel):
     attempt_number: int
     score: float
-    dimensions: list[DimensionScoreResponse] = []
-    stack: StackResponse = StackResponse()
-    adjustment_notes: list[str] = []
+    dimensions: list[DimensionScoreResponse] = Field(default_factory=list)
+    stack: StackResponse = Field(default_factory=StackResponse)
+    adjustment_notes: list[str] = Field(default_factory=list)
 
 
 class RunResponse(BaseModel):
@@ -128,6 +130,8 @@ async def api_run_task(req: RunRequest):
                 model=a.stack.model,
                 framework=a.stack.framework,
                 mcp_servers=a.stack.mcp_servers,
+                skills=a.stack.skills,
+                prompt_strategy=a.stack.prompt_strategy,
                 adjustment_notes=a.stack.adjustment_notes,
             ),
             adjustment_notes=a.adjustment_notes,
@@ -146,6 +150,8 @@ async def api_run_task(req: RunRequest):
             model=result.stack.model,
             framework=result.stack.framework,
             mcp_servers=result.stack.mcp_servers,
+            skills=result.stack.skills,
+            prompt_strategy=result.stack.prompt_strategy,
             adjustment_notes=result.stack.adjustment_notes,
         ),
         dimensions=dimensions,

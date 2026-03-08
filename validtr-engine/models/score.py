@@ -32,6 +32,8 @@ class StackSummary(BaseModel):
     model: str = ""
     framework: str | None = None
     mcp_servers: list[str] = Field(default_factory=list)
+    skills: list[str] = Field(default_factory=list)
+    prompt_strategy: str = ""
     adjustment_notes: list[str] = Field(default_factory=list)
 
 

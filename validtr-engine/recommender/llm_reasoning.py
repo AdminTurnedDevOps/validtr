@@ -46,10 +46,19 @@ class LLMReasoningEngine:
 
         response = await self.provider.complete_json(messages=messages, max_tokens=2048)
 
+        raw = response.content.strip()
+        # Strip markdown code fences that some models wrap JSON in
+        if raw.startswith("```"):
+            lines = raw.split("\n")
+            lines = lines[1:]  # drop ```json or ```
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            raw = "\n".join(lines)
+
         try:
-            data = json.loads(response.content)
+            data = json.loads(raw)
         except json.JSONDecodeError as e:
-            logger.error("Failed to parse recommendation JSON: %s", e)
+            logger.error("Failed to parse recommendation JSON: %s\nRaw: %s", e, raw[:500])
             raise ValueError(f"LLM returned invalid JSON for recommendation: {e}") from e
 
         llm_data = data["llm"]
@@ -77,6 +86,10 @@ class LLMReasoningEngine:
                 for s in mcp_list
             ],
             skills=data.get("skills", ["code-generation", "test-generation"]),
+            prompt_strategy=data.get(
+                "prompt_strategy",
+                "Decompose requirements, implement incrementally, validate with tests, then refine.",
+            ),
             estimated_tokens=data.get("estimated_tokens", 15000),
             estimated_cost=data.get("estimated_cost", "$0.04"),
         )

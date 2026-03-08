@@ -42,7 +42,7 @@ pip install -e ".[dev]"
 ### Go CLI
 
 ```bash
-cd validtr-cli && go build -o ../validtr .
+cd validtr-cli && go build -o ../validtr . && cd ..
 ```
 
 ### Configuration

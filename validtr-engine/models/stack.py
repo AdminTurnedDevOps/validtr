@@ -42,6 +42,7 @@ class StackRecommendation(BaseModel):
     framework: FrameworkRecommendation
     mcp_servers: list[MCPServerRecommendation] = Field(default_factory=list)
     skills: list[str] = Field(default_factory=list)
+    prompt_strategy: str = ""
     estimated_tokens: int = 0
     estimated_cost: str = "$0.00"
     adjustment_notes: list[str] = Field(
