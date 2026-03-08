@@ -35,7 +35,7 @@ You MUST respond with valid JSON matching this schema:
 }
 
 IMPORTANT — your recommendations must be SPECIFIC and ACTIONABLE:
-- mcp_servers: Pick 2-5 MCP servers from the Available MCP Servers list that would give the agent useful tools for THIS task. Think: what tools does the agent need? File I/O? Web docs lookup? Database? Auth service? Don't just pick "filesystem" — think about what the agent actually needs to succeed.
+- mcp_servers: Pick 2-5 MCP servers from the Available MCP Servers list that would give the agent useful tools for THIS task. Think about what tools the agent actually needs: database access? auth service? web scraping? API validation? code execution sandbox? Only include "filesystem" if the task genuinely requires file I/O beyond what the agent framework already provides.
 - skills: Pick 2-5 agent skills from the Available Agent Skills catalog. These are real, installable skills — pick the ones that match THIS task. Only recommend skills that exist in the catalog provided.
 - prompt_strategy: Explain the step-by-step approach. Example: "1) Scaffold project structure 2) Implement data models 3) Build auth middleware 4) Create API endpoints 5) Add error handling 6) Write tests"
 

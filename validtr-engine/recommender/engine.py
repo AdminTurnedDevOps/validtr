@@ -1,5 +1,6 @@
 """Recommendation Engine — orchestrates web search, MCP registry, and LLM reasoning."""
 
+import asyncio
 import logging
 
 from models.stack import StackRecommendation
@@ -39,22 +40,26 @@ class RecommendationEngine:
         frameworks = " ".join(task.requirements.frameworks) if task.requirements.frameworks else ""
         search_query = f"best practices {task.type.value} {task.domain} {frameworks}".strip()
 
-        # Web search for best practices; give the LLM ALL curated MCP servers
-        # and ALL upstream skills so it can reason about which ones help
-        web_results = await self.web_search.search(search_query)
-        all_mcp_servers = self.mcp_registry.get_all()
-        all_skills = await self.skills_registry.get_all()
+        # Build a task-specific MCP query from the task metadata
+        mcp_query = f"{task.type.value} {task.domain} {frameworks}".strip()
+
+        # Fetch in parallel: web search, relevant MCP servers, all skills
+        web_results, relevant_mcp, all_skills = await asyncio.gather(
+            self.web_search.search(search_query),
+            self.mcp_registry.get_relevant(mcp_query, limit=50),
+            self.skills_registry.get_all(),
+        )
 
         logger.info(
-            "Web search: %d results, MCP registry: %d servers, Skills catalog: %d skills",
-            len(web_results), len(all_mcp_servers), len(all_skills),
+            "Web search: %d results, MCP servers: %d relevant, Skills catalog: %d skills",
+            len(web_results), len(relevant_mcp), len(all_skills),
         )
 
         # Use LLM to synthesize into a recommendation
         recommendation = await self.llm_reasoning.recommend(
             task=task,
             web_results=web_results,
-            mcp_servers=all_mcp_servers,
+            mcp_servers=relevant_mcp,
             available_skills=all_skills,
             preferred_provider=preferred_provider,
         )
