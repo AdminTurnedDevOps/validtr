@@ -50,17 +50,6 @@ features:
   </a>
 </div>
 
-## Command Sections
-
-<div class="landing-grid landing-grid-3">
-  <a class="landing-card landing-card-compact" href="/validtr/reference/commands/run"><h3><code>run</code></h3><p>Task execution, scoring, and retries.</p></a>
-  <a class="landing-card landing-card-compact" href="/validtr/reference/commands/mcp"><h3><code>mcp</code></h3><p>MCP registry list/search/info flows.</p></a>
-  <a class="landing-card landing-card-compact" href="/validtr/reference/commands/config"><h3><code>config</code></h3><p>Local non-secret runtime settings.</p></a>
-  <a class="landing-card landing-card-compact" href="/validtr/reference/commands/completion"><h3><code>completion</code></h3><p>Shell autocompletion script generation.</p></a>
-  <a class="landing-card landing-card-compact" href="/validtr/reference/commands/help"><h3><code>help</code></h3><p>CLI usage and command introspection.</p></a>
-  <a class="landing-card landing-card-compact" href="/validtr/operations/troubleshooting"><h3>Troubleshooting</h3><p>Operational debugging and common failures.</p></a>
-</div>
-
 ## Docs Coverage
 
 <div class="landing-note">
