@@ -13,6 +13,21 @@ If the score falls below 95%, it iterates — adjusting the stack and retrying u
 - **Docker** — containers are the execution environment
 - **At least one LLM provider API key** (Anthropic, OpenAI, or Gemini)
 
+## Quickstart
+
+1. Start the backend engine
+```
+uvicorn api.server:app --host 127.0.0.1 --port 4041
+```
+
+2. Run a task
+
+```bash
+./validtr run "Build a FastAPI web app with JWT auth" --provider anthropic
+```
+
+![](images/sample.png)
+
 ## Setup
 
 ### Python Engine
@@ -27,8 +42,7 @@ pip install -e ".[dev]"
 ### Go CLI
 
 ```bash
-cd validtr-cli
-go build -o validtr .
+cd validtr-cli && go build -o ../validtr .
 ```
 
 ### Configuration
