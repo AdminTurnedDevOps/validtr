@@ -298,4 +298,4 @@ Where it overlaps
 
 ## License
 
-TBD
+MIT
