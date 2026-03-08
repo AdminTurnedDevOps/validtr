@@ -19,3 +19,7 @@ validtr-cli/validtr
 
 # validtr runtime
 validtr-output/
+
+# docs
+docs/node_modules/
+docs/.vitepress/dist/
