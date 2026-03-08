@@ -4,9 +4,71 @@
  <img src="images/validtr-logo.png?raw=true" alt="Logo" width="70%" height="70%" />
 </p>
 
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-0F172A"></a>
+  <img alt="Python" src="https://img.shields.io/badge/python-3.11%2B-1f6feb">
+  <img alt="Go" src="https://img.shields.io/badge/go-1.22%2B-0ea5e9">
+  <img alt="Runtime" src="https://img.shields.io/badge/runtime-Docker-16a34a">
+</p>
+
+<p align="center"><strong>Natural language in. Production-grade agentic stack out.</strong></p>
+
 A CLI tool that takes a natural language task description, recommends the optimal agentic stack (LLM, agent framework, MCP servers, agent skills), provisions that stack in Docker containers, executes the task, generates tests, and scores the result.
 
 If the score falls below 95%, it iterates — adjusting the stack and retrying until the threshold is met or max retries are exhausted.
+
+## Why validtr
+
+- Recommends the best-fit stack for your task instead of hardcoding one provider/toolchain.
+- Runs the generated solution in isolated Docker environments.
+- Generates tests from the task spec and output, then scores quality.
+- Retries with stack adjustments until it hits a quality threshold.
+
+## One-Minute Start
+
+### 1) Start the engine
+
+```bash
+cd validtr-engine
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+uvicorn api.server:app --host 127.0.0.1 --port 4041
+```
+
+### 2) Build the CLI
+
+```bash
+cd validtr-cli && go build -o ../validtr . && cd ..
+```
+
+### 3) Run your first task
+
+```bash
+./validtr run "Build a FastAPI web app with JWT auth" --provider anthropic
+```
+
+![](images/sample.png)
+
+## Command Cheatsheet
+
+```bash
+# Standard run
+./validtr run "Build a FastAPI web app with JWT auth" --provider anthropic
+
+# Compare providers for the same task
+validtr run "Build a REST API with CRUD endpoints" --compare anthropic,openai,gemini
+
+# Recommendation only (no Docker execution)
+validtr run "Automate PR code reviews" --dry-run
+
+# MCP discovery
+validtr mcp list
+validtr mcp search "kubernetes"
+validtr mcp info filesystem
+```
+
+## Deep Dive
 
 ## Prerequisites
 

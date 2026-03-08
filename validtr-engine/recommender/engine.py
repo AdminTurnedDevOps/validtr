@@ -7,6 +7,7 @@ from models.task import TaskDefinition
 from providers.base import LLMProvider
 from recommender.llm_reasoning import LLMReasoningEngine
 from recommender.mcp_registry import MCPRegistryClient
+from recommender.skills_registry import SkillsRegistryClient
 from recommender.web_search import WebSearchProvider
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ class RecommendationEngine:
     ):
         self.web_search = WebSearchProvider(api_key=search_api_key, provider=search_provider)
         self.mcp_registry = MCPRegistryClient()
+        self.skills_registry = SkillsRegistryClient()
         self.llm_reasoning = LLMReasoningEngine(provider=provider)
 
     async def recommend(
@@ -38,20 +40,22 @@ class RecommendationEngine:
         search_query = f"best practices {task.type.value} {task.domain} {frameworks}".strip()
 
         # Web search for best practices; give the LLM ALL curated MCP servers
-        # so it can reason about which ones help for this task
-        web_results_list = await self.web_search.search(search_query)
+        # and ALL upstream skills so it can reason about which ones help
+        web_results = await self.web_search.search(search_query)
         all_mcp_servers = self.mcp_registry.get_all()
+        all_skills = await self.skills_registry.get_all()
 
-        logger.info("Web search: %d results, MCP registry: %d servers available", len(web_results_list), len(all_mcp_servers))
-
-        web_results = web_results_list
-        mcp_servers = all_mcp_servers
+        logger.info(
+            "Web search: %d results, MCP registry: %d servers, Skills catalog: %d skills",
+            len(web_results), len(all_mcp_servers), len(all_skills),
+        )
 
         # Use LLM to synthesize into a recommendation
         recommendation = await self.llm_reasoning.recommend(
             task=task,
             web_results=web_results,
-            mcp_servers=mcp_servers,
+            mcp_servers=all_mcp_servers,
+            available_skills=all_skills,
             preferred_provider=preferred_provider,
         )
         logger.info(

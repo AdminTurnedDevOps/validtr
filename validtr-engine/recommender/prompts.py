@@ -22,15 +22,21 @@ You MUST respond with valid JSON matching this schema:
       "description": string (what tools this gives the agent)
     }
   ],
-  "skills": [string] — specific capabilities the agent needs (e.g. "jwt-token-generation", "fastapi-routing", "database-schema-design"),
+  "skills": [
+    {
+      "name": string (exact skill name from the catalog),
+      "source": "anthropic" | "github-copilot",
+      "reason": string (why this skill helps with THIS task)
+    }
+  ],
   "prompt_strategy": string — a 2-3 sentence description of how the agent should approach this task step by step,
   "estimated_tokens": integer,
   "estimated_cost": string
 }
 
 IMPORTANT — your recommendations must be SPECIFIC and ACTIONABLE:
-- mcp_servers: Pick 2-5 MCP servers from the Available list that would give the agent useful tools for THIS task. Think: what tools does the agent need? File I/O? Web docs lookup? Database? Auth service? Don't just pick "filesystem" — think about what the agent actually needs to succeed.
-- skills: List the specific technical skills needed (not generic labels). For a JWT task: "jwt-token-generation", "password-hashing", "middleware-auth". For a K8s task: "helm-chart-authoring", "rbac-configuration".
+- mcp_servers: Pick 2-5 MCP servers from the Available MCP Servers list that would give the agent useful tools for THIS task. Think: what tools does the agent need? File I/O? Web docs lookup? Database? Auth service? Don't just pick "filesystem" — think about what the agent actually needs to succeed.
+- skills: Pick 2-5 agent skills from the Available Agent Skills catalog. These are real, installable skills — pick the ones that match THIS task. Only recommend skills that exist in the catalog provided.
 - prompt_strategy: Explain the step-by-step approach. Example: "1) Scaffold project structure 2) Implement data models 3) Build auth middleware 4) Create API endpoints 5) Add error handling 6) Write tests"
 
 Model selection:
@@ -51,6 +57,9 @@ Web Search Results (best practices and tools for this kind of task):
 Available MCP Servers (pick the ones most useful for THIS task — select 2-5):
 {mcp_servers}
 
+Available Agent Skills (pick the ones most useful for THIS task — select 2-5):
+{available_skills}
+
 User's preferred provider: {preferred_provider}
 
-Recommend the optimal stack. Be specific about WHY each MCP server helps with THIS task."""
+Recommend the optimal stack. Be specific about WHY each MCP server and agent skill helps with THIS task."""
