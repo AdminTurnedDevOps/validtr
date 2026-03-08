@@ -25,3 +25,9 @@ This page reflects current implementation status.
 - depends on external APIs (provider, registries, optional Tavily)
 - registry data can vary over time
 - generated tests and completeness scoring depend on LLM quality
+
+## Roadmap Link
+
+See explicit implementation matrix:
+
+- [/roadmap/implemented-vs-roadmap](/roadmap/implemented-vs-roadmap)

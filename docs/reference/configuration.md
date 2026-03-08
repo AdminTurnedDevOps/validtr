@@ -43,3 +43,7 @@ Provider API keys are intentionally excluded from config file storage.
 ## Search Key
 
 `TAVILY_API_KEY` is read from environment and passed to recommendation web search.
+
+## Related
+
+- environment variables: [/reference/environment-variables](/reference/environment-variables)

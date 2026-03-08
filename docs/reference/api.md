@@ -53,3 +53,8 @@ When `dry_run=true`, response is:
 
 - `task`: analyzed `TaskDefinition`
 - `recommendation`: full `StackRecommendation`
+
+## Related
+
+- examples: [/reference/api-examples](/reference/api-examples)
+- errors: [/reference/error-catalog](/reference/error-catalog)

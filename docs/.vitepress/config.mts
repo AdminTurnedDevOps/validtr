@@ -12,6 +12,7 @@ export default defineConfig({
       { text: 'Guide', link: '/getting-started/overview' },
       { text: 'Concepts', link: '/concepts/architecture' },
       { text: 'Reference', link: '/reference/cli' },
+      { text: 'Development', link: '/development/local-dev' },
       { text: 'Operations', link: '/operations/troubleshooting' },
       { text: 'Releases', link: '/releases/changelog' },
       { text: 'Roadmap', link: '/roadmap/implemented-vs-roadmap' },
@@ -48,14 +49,24 @@ export default defineConfig({
           text: 'Reference',
           items: [
             { text: 'CLI', link: '/reference/cli' },
+            { text: 'CLI Commands', link: '/reference/commands/index' },
+            { text: 'run', link: '/reference/commands/run' },
+            { text: 'mcp', link: '/reference/commands/mcp' },
+            { text: 'config', link: '/reference/commands/config' },
+            { text: 'completion', link: '/reference/commands/completion' },
+            { text: 'help', link: '/reference/commands/help' },
             { text: 'Engine API', link: '/reference/api' },
+            { text: 'API Examples', link: '/reference/api-examples' },
+            { text: 'Error Catalog', link: '/reference/error-catalog' },
             { text: 'Configuration', link: '/reference/configuration' },
+            { text: 'Environment Variables', link: '/reference/environment-variables' },
             { text: 'Providers', link: '/reference/providers' },
             { text: 'Data Models', link: '/reference/models' },
             { text: 'Recommendation Engine', link: '/reference/recommendation' },
             { text: 'MCP Registry', link: '/reference/mcp-registry' },
             { text: 'Skills Registry', link: '/reference/skills-registry' },
             { text: 'Execution Runtime', link: '/reference/execution-runtime' },
+            { text: 'Artifacts and Paths', link: '/reference/artifacts-and-paths' },
             { text: 'Testing and Validation', link: '/reference/testing-validation' },
             { text: 'Retry Strategy', link: '/reference/retry-strategy' },
             { text: 'Prompts and Contracts', link: '/reference/prompts-contracts' }
@@ -85,6 +96,16 @@ export default defineConfig({
           text: 'Roadmap',
           items: [
             { text: 'Implemented vs Roadmap', link: '/roadmap/implemented-vs-roadmap' }
+          ]
+        }
+      ],
+      '/development/': [
+        {
+          text: 'Development',
+          items: [
+            { text: 'Local Dev', link: '/development/local-dev' },
+            { text: 'Testing', link: '/development/testing' },
+            { text: 'Release Workflow', link: '/development/release-workflow' }
           ]
         }
       ]

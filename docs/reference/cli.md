@@ -1,36 +1,23 @@
 # CLI Reference
 
-## run
+This page is the entrypoint for all CLI command documentation.
 
-```bash
-./validtr run "Build a FastAPI web app with JWT auth" --provider anthropic
-```
+## Available Commands
 
-Flags:
+- `completion`
+- `config`
+- `help`
+- `mcp`
+- `run`
 
-- `--provider` provider name (`anthropic`, `openai`, `gemini`)
-- `--compare` comma-separated providers for comparison mode
-- `--dry-run` recommendation only (no execution)
-- `--model` model override
-- `--max-retries` retry limit
-- `--score-threshold` passing threshold
-- `--timeout` execution timeout in seconds
+## Start Here
 
-## mcp
-
-```bash
-./validtr mcp list
-./validtr mcp search "kubernetes"
-./validtr mcp info filesystem
-```
-
-## config
-
-```bash
-./validtr config set provider anthropic
-./validtr config set score-threshold 90
-./validtr config show
-```
+- command index: [/reference/commands/index](/reference/commands/index)
+- run command: [/reference/commands/run](/reference/commands/run)
+- mcp command: [/reference/commands/mcp](/reference/commands/mcp)
+- config command: [/reference/commands/config](/reference/commands/config)
+- completion command: [/reference/commands/completion](/reference/commands/completion)
+- help command: [/reference/commands/help](/reference/commands/help)
 
 ## Command Behavior Notes
 
