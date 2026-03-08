@@ -62,3 +62,35 @@ class RecommendationEngine:
         )
 
         return recommendation
+
+    async def search_additional(
+        self,
+        task: TaskDefinition,
+        query_hints: list[str],
+    ) -> list:
+        """Run additional MCP registry + web searches based on failure hints.
+
+        Returns a list of MCPServerRecommendation objects found.
+        """
+        from models.stack import MCPServerRecommendation, MCPTransport
+
+        all_servers = []
+        seen_names: set[str] = set()
+
+        for hint in query_hints[:3]:  # limit to 3 queries
+            mcp_results = await self.mcp_registry.search(hint)
+            for s in mcp_results:
+                name = s.get("name", "")
+                if name and name not in seen_names:
+                    seen_names.add(name)
+                    all_servers.append(
+                        MCPServerRecommendation(
+                            name=name,
+                            transport=MCPTransport(s.get("transport", "stdio")),
+                            install=s.get("install", ""),
+                            credentials=s.get("credentials", "none"),
+                            description=s.get("description", ""),
+                        )
+                    )
+
+        return all_servers

@@ -29,21 +29,8 @@ async def run_task(
 ) -> FinalResult:
     """Run the full validtr pipeline for a task.
 
-    This is the main entry point for Phase 1.
-
-    Args:
-        task: Natural language task description.
-        provider: LLM provider name ("anthropic", "openai", "gemini").
-        api_key: API key for the specified provider.
-        model: Optional specific model to use.
-        max_retries: Maximum retry attempts if score < threshold.
-        score_threshold: Minimum score to pass (0-100).
-        timeout: Execution timeout in seconds.
-        search_api_key: API key for web search (Tavily).
-        extra_api_keys: Additional API keys (e.g., for MCP servers).
-
     Returns:
-        FinalResult with score, artifacts, test results, and attempt history.
+        FinalResult with the best stack recommendation, score, and attempt history.
     """
     run_id = uuid.uuid4().hex[:6]
     logger.info("Starting validtr run %s: %s", run_id, task[:80])
@@ -82,7 +69,6 @@ async def run_task(
     test_gen = TestGenerator(provider=llm)
     scoring = ScoringEngine(provider=llm)
 
-    best_result = None
     attempt = 0
 
     while True:
@@ -128,8 +114,27 @@ async def run_task(
         if not retry_ctrl.should_retry(score, attempt):
             break
 
-        logger.info("[7/7] Adjusting stack for retry...")
-        stack = retry_ctrl.get_adjusted_stack(stack, score, test_results)
+        logger.info("[7/7] Analyzing failures and adjusting stack...")
+        adjusted_stack, re_search_hints = retry_ctrl.analyze_and_adjust(stack, score, test_results)
+
+        # If re-search is recommended, run the recommendation engine again
+        # with additional context from the failure analysis
+        if re_search_hints:
+            logger.info("Re-searching with hints: %s", re_search_hints)
+            supplemental = await recommender.search_additional(
+                task_def, re_search_hints
+            )
+            # Merge any new MCP servers into the adjusted stack
+            existing_names = {s.name for s in adjusted_stack.mcp_servers}
+            for server in supplemental:
+                if server.name not in existing_names:
+                    adjusted_stack.mcp_servers.append(server)
+                    adjusted_stack.adjustment_notes.append(
+                        f"added MCP server: {server.name} ({server.description})"
+                    )
+                    logger.info("Added MCP server: %s", server.name)
+
+        stack = adjusted_stack
 
     # Get best result
     best = retry_ctrl.get_best_attempt()
@@ -154,11 +159,12 @@ async def run_task(
         )
 
     logger.info(
-        "Run %s complete: score=%.1f, attempts=%d, passed=%s",
+        "Run %s complete: best stack=%s/%s, score=%.1f, attempts=%d",
         run_id,
+        best_result.stack.provider,
+        best_result.stack.model,
         best_result.score,
         best_result.total_attempts,
-        best_result.passed,
     )
 
     return best_result

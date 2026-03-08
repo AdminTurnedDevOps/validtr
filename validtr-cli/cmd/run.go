@@ -183,14 +183,9 @@ func runDryRunMode(cmd *cobra.Command, task string) error {
 }
 
 func printResult(result *engine.RunResult) {
-	status := "FAIL"
-	if result.Passed {
-		status = "PASS"
-	}
-
-	// Stack recommendation
+	// Best stack recommendation — the whole point of the tool
 	fmt.Println("│")
-	fmt.Println("│  Recommended Stack")
+	fmt.Println("│  Best Stack Found")
 	fmt.Printf("│    Provider:  %s\n", result.Stack.Provider)
 	fmt.Printf("│    Model:     %s\n", result.Stack.Model)
 	if result.Stack.Framework != nil && *result.Stack.Framework != "" {
@@ -200,9 +195,9 @@ func printResult(result *engine.RunResult) {
 		fmt.Printf("│    MCP:       %s\n", strings.Join(result.Stack.MCPServers, ", "))
 	}
 
-	// Score breakdown
+	// Validation score with breakdown
 	fmt.Println("│")
-	fmt.Printf("│  Score: %.0f/100  [%s]\n", result.Score, status)
+	fmt.Printf("│  Validation Score: %.0f/100\n", result.Score)
 	if len(result.Dimensions) > 0 {
 		for _, d := range result.Dimensions {
 			bar := scoreBar(d.Score, d.MaxScore)
@@ -210,23 +205,26 @@ func printResult(result *engine.RunResult) {
 		}
 	}
 
-	// Attempt history
+	// Attempt history — show how the stack was refined
 	if result.TotalAttempts > 1 {
 		fmt.Println("│")
-		fmt.Printf("│  Attempts: %d (best: #%d)\n", result.TotalAttempts, result.BestAttempt)
+		fmt.Printf("│  Explored %d configurations (best: #%d)\n", result.TotalAttempts, result.BestAttempt)
 		for _, a := range result.Attempts {
 			marker := " "
 			if a.AttemptNumber == result.BestAttempt {
 				marker = "*"
 			}
 			fmt.Printf("│   %s #%d  %.0f/100  %s/%s\n", marker, a.AttemptNumber, a.Score, a.Stack.Provider, a.Stack.Model)
+			if len(a.Stack.MCPServers) > 0 {
+				fmt.Printf("│          MCP: %s\n", strings.Join(a.Stack.MCPServers, ", "))
+			}
 			for _, note := range a.AdjustmentNotes {
 				fmt.Printf("│          -> %s\n", note)
 			}
 		}
 	} else {
 		fmt.Println("│")
-		fmt.Printf("│  Attempts: %d\n", result.TotalAttempts)
+		fmt.Printf("│  Validated in %d attempt\n", result.TotalAttempts)
 	}
 
 	fmt.Printf("│  Artifacts: %d files\n", result.ArtifactCount)

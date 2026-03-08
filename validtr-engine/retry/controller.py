@@ -5,7 +5,7 @@ import logging
 from models.score import AttemptResult, ScoreResult, StackSummary
 from models.stack import StackRecommendation
 from models.test_result import TestSuiteResult
-from retry.analysis import analyze_failures, apply_adjustments
+from retry.analysis import analyze_failures, apply_adjustments, get_re_search_hints
 
 logger = logging.getLogger(__name__)
 
@@ -37,16 +37,21 @@ class RetryController:
         )
         return True
 
-    def get_adjusted_stack(
+    def analyze_and_adjust(
         self,
         current_stack: StackRecommendation,
         score: ScoreResult,
         test_results: TestSuiteResult,
-    ) -> StackRecommendation:
-        """Generate an adjusted stack recommendation for retry."""
+    ) -> tuple[StackRecommendation, list[str]]:
+        """Analyze failures, adjust stack, and return (new_stack, re_search_hints).
+
+        re_search_hints: non-empty if the recommendation engine should re-search
+        with additional queries before the next attempt.
+        """
         adjustments = analyze_failures(score, test_results, current_stack)
-        logger.info("Adjustments for retry: %s", adjustments)
-        return apply_adjustments(current_stack, adjustments)
+        new_stack = apply_adjustments(current_stack, adjustments)
+        re_search_hints = get_re_search_hints(adjustments)
+        return new_stack, re_search_hints
 
     def record_attempt(
         self,

@@ -163,9 +163,9 @@ class TestAnalyzeFailures:
         )
         stack = _make_stack()
         adjustments = analyze_failures(score, test_results, stack)
-        assert any("upgrade_model" in a for a in adjustments)
+        assert any(a["action"] == "upgrade_model" for a in adjustments)
 
-    def test_execution_failure_suggests_check_deps(self):
+    def test_execution_failure_suggests_add_mcp(self):
         score = ScoreResult(
             composite_score=55.0,
             dimensions=[
@@ -178,7 +178,7 @@ class TestAnalyzeFailures:
         test_results = TestSuiteResult(total=5, passed=5)
         stack = _make_stack()
         adjustments = analyze_failures(score, test_results, stack)
-        assert any("check_dependencies" in a for a in adjustments)
+        assert any(a["action"] == "add_mcp_server" for a in adjustments)
 
     def test_syntax_failure_suggests_upgrade(self):
         score = ScoreResult(
@@ -193,7 +193,7 @@ class TestAnalyzeFailures:
         test_results = TestSuiteResult(total=5, passed=5)
         stack = _make_stack()
         adjustments = analyze_failures(score, test_results, stack)
-        assert any("syntax" in a for a in adjustments)
+        assert any(a["action"] == "upgrade_model" and "syntax" in a["reason"] for a in adjustments)
 
     def test_completeness_failure_suggests_mcp(self):
         score = ScoreResult(
@@ -208,7 +208,7 @@ class TestAnalyzeFailures:
         test_results = TestSuiteResult(total=5, passed=5)
         stack = _make_stack()
         adjustments = analyze_failures(score, test_results, stack)
-        assert any("add_mcp_server" in a for a in adjustments)
+        assert any(a["action"] == "re_search" for a in adjustments)
 
     def test_all_high_scores_fallback(self):
         score = ScoreResult(
@@ -253,35 +253,34 @@ class TestApplyAdjustments:
 
     def test_upgrade_model_anthropic(self):
         stack = _make_stack(provider="anthropic", model="claude-sonnet-4-20250514")
-        adjustments = ["upgrade_model: tests failed"]
+        adjustments = [{"action": "upgrade_model", "reason": "tests failed"}]
         new_stack = apply_adjustments(stack, adjustments)
         assert new_stack.llm.model == "claude-opus-4-20250514"
-        assert new_stack.adjustment_notes == adjustments
+        assert "upgrade_model: tests failed" in new_stack.adjustment_notes
 
     def test_upgrade_model_openai(self):
         stack = _make_stack(provider="openai", model="gpt-4o-mini")
-        adjustments = ["upgrade_model: tests failed"]
+        adjustments = [{"action": "upgrade_model", "reason": "tests failed"}]
         new_stack = apply_adjustments(stack, adjustments)
         assert new_stack.llm.model == "gpt-4o"
 
     def test_upgrade_model_already_best(self):
         stack = _make_stack(provider="anthropic", model="claude-opus-4-20250514")
-        adjustments = ["upgrade_model: tests failed"]
+        adjustments = [{"action": "upgrade_model", "reason": "tests failed"}]
         new_stack = apply_adjustments(stack, adjustments)
         # Already at the best model, should stay the same
         assert new_stack.llm.model == "claude-opus-4-20250514"
 
-    def test_no_upgrade_for_check_dependencies(self):
+    def test_re_search_does_not_upgrade_model(self):
         stack = _make_stack(provider="openai", model="gpt-4o")
-        adjustments = ["check_dependencies: execution failure"]
+        adjustments = [{"action": "re_search", "reason": "find tools", "query_hints": ["test"]}]
         new_stack = apply_adjustments(stack, adjustments)
-        # check_dependencies doesn't trigger model upgrade
+        # re_search doesn't trigger model upgrade
         assert new_stack.llm.model == "gpt-4o"
-        assert new_stack.adjustment_notes == adjustments
 
     def test_original_stack_unchanged(self):
         stack = _make_stack(provider="openai", model="gpt-4o-mini")
-        adjustments = ["upgrade_model: tests failed"]
+        adjustments = [{"action": "upgrade_model", "reason": "tests failed"}]
         new_stack = apply_adjustments(stack, adjustments)
         # Original stack should not be mutated
         assert stack.llm.model == "gpt-4o-mini"
@@ -289,9 +288,13 @@ class TestApplyAdjustments:
 
     def test_adjustment_notes_set(self):
         stack = _make_stack()
-        adjustments = ["upgrade_model: a", "add_mcp_server: b"]
+        adjustments = [
+            {"action": "upgrade_model", "reason": "a"},
+            {"action": "re_search", "reason": "b"},
+        ]
         new_stack = apply_adjustments(stack, adjustments)
-        assert new_stack.adjustment_notes == adjustments
+        assert "upgrade_model: a" in new_stack.adjustment_notes
+        assert "re_search: b" in new_stack.adjustment_notes
 
     def test_model_upgrades_map_structure(self):
         assert "anthropic" in MODEL_UPGRADES

@@ -20,12 +20,17 @@ def analyze_failures(
     score: ScoreResult,
     test_results: TestSuiteResult,
     current_stack: StackRecommendation,
-) -> list[str]:
-    """Analyze failures and return a list of adjustment recommendations."""
+) -> list[dict]:
+    """Analyze failures and return structured adjustment recommendations.
+
+    Each adjustment is a dict: {"action": str, "reason": str, ...}
+    """
     adjustments = []
 
-    # Find weakest dimensions
-    dimensions_by_score = sorted(score.dimensions, key=lambda d: d.score / d.max_score if d.max_score > 0 else 1)
+    dimensions_by_score = sorted(
+        score.dimensions,
+        key=lambda d: d.score / d.max_score if d.max_score > 0 else 1,
+    )
 
     for dim in dimensions_by_score:
         ratio = dim.score / dim.max_score if dim.max_score > 0 else 1
@@ -33,40 +38,66 @@ def analyze_failures(
             continue
 
         if dim.name == "Test passing":
-            # Check what kinds of tests failed
             failed_tests = [t for t in test_results.tests if t.status == TestStatus.FAILED]
             if failed_tests:
-                adjustments.append(f"upgrade_model: {len(failed_tests)} tests failed")
+                # Gather failure messages for targeted re-search
+                failure_msgs = [t.message for t in failed_tests[:3] if t.message]
+                adjustments.append({
+                    "action": "upgrade_model",
+                    "reason": f"{len(failed_tests)} tests failed",
+                })
+                if failure_msgs:
+                    adjustments.append({
+                        "action": "re_search",
+                        "reason": "find tools to fix test failures",
+                        "query_hints": failure_msgs,
+                    })
 
         elif dim.name == "Execution":
-            adjustments.append("check_dependencies: execution failure")
+            adjustments.append({
+                "action": "add_mcp_server",
+                "reason": "execution failure — may need additional tools",
+                "query_hints": ["execution runtime tools", current_stack.llm.provider],
+            })
 
         elif dim.name == "Syntax validity":
-            adjustments.append("upgrade_model: syntax errors in output")
+            adjustments.append({
+                "action": "upgrade_model",
+                "reason": "syntax errors in output",
+            })
 
         elif dim.name == "Completeness":
-            adjustments.append("upgrade_model: incomplete output")
-            adjustments.append("add_mcp_server: may need additional tools")
+            adjustments.append({
+                "action": "upgrade_model",
+                "reason": "incomplete output",
+            })
+            adjustments.append({
+                "action": "re_search",
+                "reason": "find MCP servers or skills for missing capabilities",
+                "query_hints": [dim.details] if dim.details else [],
+            })
 
     if not adjustments:
-        adjustments.append("upgrade_model: general improvement needed")
+        adjustments.append({
+            "action": "upgrade_model",
+            "reason": "general improvement needed",
+        })
 
     return adjustments
 
 
 def apply_adjustments(
     stack: StackRecommendation,
-    adjustments: list[str],
+    adjustments: list[dict],
 ) -> StackRecommendation:
     """Apply adjustments to the stack recommendation for retry."""
     new_stack = stack.model_copy(deep=True)
-    new_stack.adjustment_notes = adjustments
+    new_stack.adjustment_notes = [f"{a['action']}: {a['reason']}" for a in adjustments]
 
     for adj in adjustments:
-        action = adj.split(":")[0].strip()
+        action = adj["action"]
 
         if action == "upgrade_model":
-            # Try to upgrade to a stronger model
             provider = new_stack.llm.provider
             models = MODEL_UPGRADES.get(provider, [])
             current_idx = -1
@@ -79,6 +110,15 @@ def apply_adjustments(
                 new_model = models[current_idx + 1]
                 logger.info("Upgrading model: %s -> %s", new_stack.llm.model, new_model)
                 new_stack.llm.model = new_model
-                new_stack.llm.reason = f"Upgraded from previous attempt: {adj}"
+                new_stack.llm.reason = f"Upgraded from previous attempt: {adj['reason']}"
 
     return new_stack
+
+
+def get_re_search_hints(adjustments: list[dict]) -> list[str]:
+    """Extract query hints from adjustments that need re-searching."""
+    hints = []
+    for adj in adjustments:
+        if adj["action"] == "re_search":
+            hints.extend(adj.get("query_hints", []))
+    return hints
