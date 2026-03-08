@@ -183,16 +183,72 @@ func runDryRunMode(cmd *cobra.Command, task string) error {
 }
 
 func printResult(result *engine.RunResult) {
-	status := "❌ FAIL"
+	status := "FAIL"
 	if result.Passed {
-		status = "✅ PASS"
+		status = "PASS"
 	}
 
-	fmt.Printf("│                                                  │\n")
-	fmt.Printf("│  Score: %.0f/100                    %s\n", result.Score, status)
-	fmt.Printf("│  Attempts: %d                                    │\n", result.TotalAttempts)
-	fmt.Printf("│  Artifacts: %d files                             │\n", result.ArtifactCount)
+	// Stack recommendation
+	fmt.Println("│")
+	fmt.Println("│  Recommended Stack")
+	fmt.Printf("│    Provider:  %s\n", result.Stack.Provider)
+	fmt.Printf("│    Model:     %s\n", result.Stack.Model)
+	if result.Stack.Framework != nil && *result.Stack.Framework != "" {
+		fmt.Printf("│    Framework: %s\n", *result.Stack.Framework)
+	}
+	if len(result.Stack.MCPServers) > 0 {
+		fmt.Printf("│    MCP:       %s\n", strings.Join(result.Stack.MCPServers, ", "))
+	}
+
+	// Score breakdown
+	fmt.Println("│")
+	fmt.Printf("│  Score: %.0f/100  [%s]\n", result.Score, status)
+	if len(result.Dimensions) > 0 {
+		for _, d := range result.Dimensions {
+			bar := scoreBar(d.Score, d.MaxScore)
+			fmt.Printf("│    %-20s %s  %.0f/%.0f\n", d.Name, bar, d.Score, d.MaxScore)
+		}
+	}
+
+	// Attempt history
+	if result.TotalAttempts > 1 {
+		fmt.Println("│")
+		fmt.Printf("│  Attempts: %d (best: #%d)\n", result.TotalAttempts, result.BestAttempt)
+		for _, a := range result.Attempts {
+			marker := " "
+			if a.AttemptNumber == result.BestAttempt {
+				marker = "*"
+			}
+			fmt.Printf("│   %s #%d  %.0f/100  %s/%s\n", marker, a.AttemptNumber, a.Score, a.Stack.Provider, a.Stack.Model)
+			for _, note := range a.AdjustmentNotes {
+				fmt.Printf("│          -> %s\n", note)
+			}
+		}
+	} else {
+		fmt.Println("│")
+		fmt.Printf("│  Attempts: %d\n", result.TotalAttempts)
+	}
+
+	fmt.Printf("│  Artifacts: %d files\n", result.ArtifactCount)
 	fmt.Println("╰──────────────────────────────────────────────────╯")
+}
+
+func scoreBar(score, max float64) string {
+	if max <= 0 {
+		return "          "
+	}
+	filled := int((score / max) * 10)
+	if filled > 10 {
+		filled = 10
+	}
+	bar := ""
+	for i := 0; i < filled; i++ {
+		bar += "█"
+	}
+	for i := filled; i < 10; i++ {
+		bar += "░"
+	}
+	return bar
 }
 
 func truncate(s string, maxLen int) string {

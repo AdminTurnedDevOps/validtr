@@ -6,7 +6,7 @@ import uuid
 from analyzer.task_analyzer import TaskAnalyzer
 from executor.engine import ExecutionEngine
 from executor.safety import SafetyLimits
-from models.score import FinalResult
+from models.score import FinalResult, StackSummary
 from providers.base import get_provider
 from recommender.engine import RecommendationEngine
 from retry.controller import RetryController
@@ -119,6 +119,7 @@ async def run_task(
             attempt_number=attempt,
             score=score,
             artifacts=execution.artifacts,
+            stack=stack,
             test_code=test_results.test_code,
             adjustment_notes=stack.adjustment_notes,
         )
@@ -140,6 +141,7 @@ async def run_task(
             best_attempt=best.attempt_number,
             total_attempts=len(retry_ctrl.attempts),
             attempts=retry_ctrl.attempts,
+            stack=best.stack,
             artifacts=best.artifacts,
             test_results=best.test_code,
             score=best.score.composite_score,

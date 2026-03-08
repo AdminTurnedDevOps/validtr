@@ -1,7 +1,7 @@
 # validtr
 
 <p align="center">
- <img src="images/validtr-logo.png?raw=true" alt="Logo" width="50%" height="50%" />
+ <img src="images/validtr-logo.png?raw=true" alt="Logo" width="70%" height="70%" />
 </p>
 
 A CLI tool that takes a natural language task description, recommends the optimal agentic stack (LLM, agent framework, MCP servers, agent skills), provisions that stack in Docker containers, executes the task, generates tests, and scores the result.

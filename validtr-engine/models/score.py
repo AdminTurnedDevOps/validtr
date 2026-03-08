@@ -25,11 +25,22 @@ class ScoreResult(BaseModel):
         return self.passed
 
 
+class StackSummary(BaseModel):
+    """Lightweight summary of the stack used for an attempt."""
+
+    provider: str = ""
+    model: str = ""
+    framework: str | None = None
+    mcp_servers: list[str] = Field(default_factory=list)
+    adjustment_notes: list[str] = Field(default_factory=list)
+
+
 class AttemptResult(BaseModel):
     """Result of a single attempt (execution + tests + score)."""
 
     attempt_number: int
     score: ScoreResult
+    stack: StackSummary = Field(default_factory=StackSummary)
     artifacts: dict[str, str] = Field(default_factory=dict)
     test_code: str = ""
     adjustment_notes: list[str] = Field(default_factory=list)
@@ -44,6 +55,7 @@ class FinalResult(BaseModel):
     best_attempt: int = 0
     total_attempts: int = 0
     attempts: list[AttemptResult] = Field(default_factory=list)
+    stack: StackSummary = Field(default_factory=StackSummary)
     artifacts: dict[str, str] = Field(default_factory=dict)
     test_results: str = ""
     score: float = 0.0

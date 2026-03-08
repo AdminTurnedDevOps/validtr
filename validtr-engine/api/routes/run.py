@@ -26,11 +26,38 @@ class RunRequest(BaseModel):
     dry_run: bool = False
 
 
+class DimensionScoreResponse(BaseModel):
+    name: str
+    score: float
+    max_score: float
+    details: str = ""
+
+
+class StackResponse(BaseModel):
+    provider: str = ""
+    model: str = ""
+    framework: str | None = None
+    mcp_servers: list[str] = []
+    adjustment_notes: list[str] = []
+
+
+class AttemptResponse(BaseModel):
+    attempt_number: int
+    score: float
+    dimensions: list[DimensionScoreResponse] = []
+    stack: StackResponse = StackResponse()
+    adjustment_notes: list[str] = []
+
+
 class RunResponse(BaseModel):
     run_id: str
     score: float
     passed: bool
     total_attempts: int
+    best_attempt: int
+    stack: StackResponse
+    dimensions: list[DimensionScoreResponse]
+    attempts: list[AttemptResponse]
     artifact_count: int
     artifacts: dict[str, str]
 
@@ -70,11 +97,59 @@ async def api_run_task(req: RunRequest):
             raise HTTPException(status_code=429, detail=f"Rate limited or permission denied: {e}") from e
         raise
 
+    # Build the best attempt's dimension breakdown
+    best = None
+    for a in result.attempts:
+        if a.attempt_number == result.best_attempt:
+            best = a
+            break
+
+    dimensions = []
+    if best:
+        dimensions = [
+            DimensionScoreResponse(
+                name=d.name, score=d.score, max_score=d.max_score, details=d.details,
+            )
+            for d in best.score.dimensions
+        ]
+
+    attempts_out = [
+        AttemptResponse(
+            attempt_number=a.attempt_number,
+            score=a.score.composite_score,
+            dimensions=[
+                DimensionScoreResponse(
+                    name=d.name, score=d.score, max_score=d.max_score, details=d.details,
+                )
+                for d in a.score.dimensions
+            ],
+            stack=StackResponse(
+                provider=a.stack.provider,
+                model=a.stack.model,
+                framework=a.stack.framework,
+                mcp_servers=a.stack.mcp_servers,
+                adjustment_notes=a.stack.adjustment_notes,
+            ),
+            adjustment_notes=a.adjustment_notes,
+        )
+        for a in result.attempts
+    ]
+
     return RunResponse(
         run_id=result.run_id,
         score=result.score,
         passed=result.passed,
         total_attempts=result.total_attempts,
+        best_attempt=result.best_attempt,
+        stack=StackResponse(
+            provider=result.stack.provider,
+            model=result.stack.model,
+            framework=result.stack.framework,
+            mcp_servers=result.stack.mcp_servers,
+            adjustment_notes=result.stack.adjustment_notes,
+        ),
+        dimensions=dimensions,
+        attempts=attempts_out,
         artifact_count=len(result.artifacts),
         artifacts=result.artifacts,
     )

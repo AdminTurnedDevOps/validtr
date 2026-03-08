@@ -16,13 +16,43 @@ type Client struct {
 	baseURL    string
 }
 
+// DimensionScore holds a single scoring dimension result.
+type DimensionScore struct {
+	Name     string  `json:"name"`
+	Score    float64 `json:"score"`
+	MaxScore float64 `json:"max_score"`
+	Details  string  `json:"details"`
+}
+
+// StackInfo holds the recommended stack details.
+type StackInfo struct {
+	Provider        string   `json:"provider"`
+	Model           string   `json:"model"`
+	Framework       *string  `json:"framework"`
+	MCPServers      []string `json:"mcp_servers"`
+	AdjustmentNotes []string `json:"adjustment_notes"`
+}
+
+// AttemptInfo holds results from a single attempt.
+type AttemptInfo struct {
+	AttemptNumber   int              `json:"attempt_number"`
+	Score           float64          `json:"score"`
+	Dimensions      []DimensionScore `json:"dimensions"`
+	Stack           StackInfo        `json:"stack"`
+	AdjustmentNotes []string         `json:"adjustment_notes"`
+}
+
 // RunResult holds the result of a task run.
 type RunResult struct {
-	RunID         string  `json:"run_id"`
-	Score         float64 `json:"score"`
-	Passed        bool    `json:"passed"`
-	TotalAttempts int     `json:"total_attempts"`
-	ArtifactCount int     `json:"artifact_count"`
+	RunID         string            `json:"run_id"`
+	Score         float64           `json:"score"`
+	Passed        bool              `json:"passed"`
+	TotalAttempts int               `json:"total_attempts"`
+	BestAttempt   int               `json:"best_attempt"`
+	Stack         StackInfo         `json:"stack"`
+	Dimensions    []DimensionScore  `json:"dimensions"`
+	Attempts      []AttemptInfo     `json:"attempts"`
+	ArtifactCount int               `json:"artifact_count"`
 	Artifacts     map[string]string `json:"artifacts"`
 }
 

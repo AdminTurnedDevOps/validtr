@@ -2,7 +2,7 @@
 
 import logging
 
-from models.score import AttemptResult, ScoreResult
+from models.score import AttemptResult, ScoreResult, StackSummary
 from models.stack import StackRecommendation
 from models.test_result import TestSuiteResult
 from retry.analysis import analyze_failures, apply_adjustments
@@ -53,13 +53,24 @@ class RetryController:
         attempt_number: int,
         score: ScoreResult,
         artifacts: dict[str, str],
+        stack: StackRecommendation | None = None,
         test_code: str = "",
         adjustment_notes: list[str] | None = None,
     ) -> None:
         """Record an attempt result."""
+        stack_summary = StackSummary()
+        if stack:
+            stack_summary = StackSummary(
+                provider=stack.llm.provider,
+                model=stack.llm.model,
+                framework=stack.framework.name,
+                mcp_servers=[s.name for s in stack.mcp_servers],
+                adjustment_notes=stack.adjustment_notes,
+            )
         self.attempts.append(AttemptResult(
             attempt_number=attempt_number,
             score=score,
+            stack=stack_summary,
             artifacts=artifacts,
             test_code=test_code,
             adjustment_notes=adjustment_notes or [],
