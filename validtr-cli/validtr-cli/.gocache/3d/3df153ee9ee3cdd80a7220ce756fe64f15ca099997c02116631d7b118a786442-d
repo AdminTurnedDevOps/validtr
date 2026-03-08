@@ -1,0 +1,17 @@
+# test log
+getenv HOME
+open /Users/michael/.validtr/config.yaml
+getenv TMPDIR
+stat /var/folders/c7/m_mq7b7d6t37zt5fg7gg4hb80000gn/T/TestSaveAndLoad_Roundtrip149440754/001
+open /var/folders/c7/m_mq7b7d6t37zt5fg7gg4hb80000gn/T/TestSaveAndLoad_Roundtrip149440754/001/config.yaml
+stat /var/folders/c7/m_mq7b7d6t37zt5fg7gg4hb80000gn/T/TestSaveAndLoad_Roundtrip149440754/001/config.yaml
+open /var/folders/c7/m_mq7b7d6t37zt5fg7gg4hb80000gn/T/TestSaveAndLoad_Roundtrip149440754/001/config.yaml
+open /var/folders/c7/m_mq7b7d6t37zt5fg7gg4hb80000gn/T
+getenv TAVILY_API_KEY
+getenv TAVILY_API_KEY
+getenv TAVILY_API_KEY
+getenv TAVILY_API_KEY
+getenv ANTHROPIC_API_KEY
+getenv ANTHROPIC_API_KEY
+getenv ANTHROPIC_API_KEY
+getenv ANTHROPIC_API_KEY

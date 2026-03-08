@@ -1,0 +1,14 @@
+# validtr configuration
+# Copy to ~/.validtr/config.yaml
+#
+# API keys are set via environment variables, NOT in this file:
+#   export ANTHROPIC_API_KEY="sk-ant-..."
+#   export OPENAI_API_KEY="sk-..."
+#   export GOOGLE_API_KEY="..."
+#   export TAVILY_API_KEY="tvly-..."
+
+provider: anthropic
+score_threshold: 95.0
+max_retries: 3
+timeout: 300
+engine_addr: "http://127.0.0.1:4041"

@@ -1,0 +1,4 @@
+./config.go
+./mcp.go
+./root.go
+./run.go

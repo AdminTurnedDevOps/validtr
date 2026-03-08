@@ -1,0 +1,21 @@
+# Python
+.venv/
+__pycache__/
+*.egg-info/
+*.pyc
+dist/
+build/
+
+# Go
+validtr-cli/validtr
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# validtr runtime
+validtr-output/

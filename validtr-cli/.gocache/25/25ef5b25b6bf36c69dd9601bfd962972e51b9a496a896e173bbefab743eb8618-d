@@ -1,0 +1,3 @@
+./config.go
+./credentials.go
+./config_test.go

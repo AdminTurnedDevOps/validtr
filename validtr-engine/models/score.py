@@ -1,0 +1,53 @@
+"""Scoring models."""
+
+from pydantic import BaseModel, Field
+
+
+class DimensionScore(BaseModel):
+    """Score for a single dimension."""
+
+    name: str
+    score: float
+    max_score: float
+    details: str = ""
+
+
+class ScoreResult(BaseModel):
+    """Composite score from the Scoring Engine."""
+
+    composite_score: float = 0.0
+    dimensions: list[DimensionScore] = Field(default_factory=list)
+    passed: bool = False
+    threshold: float = 95.0
+
+    def check_passed(self) -> bool:
+        self.passed = self.composite_score >= self.threshold
+        return self.passed
+
+
+class AttemptResult(BaseModel):
+    """Result of a single attempt (execution + tests + score)."""
+
+    attempt_number: int
+    score: ScoreResult
+    artifacts: dict[str, str] = Field(default_factory=dict)
+    test_code: str = ""
+    adjustment_notes: list[str] = Field(default_factory=list)
+
+
+class FinalResult(BaseModel):
+    """Final result returned by the orchestrator."""
+
+    run_id: str
+    task_description: str
+    best_score: float = 0.0
+    best_attempt: int = 0
+    total_attempts: int = 0
+    attempts: list[AttemptResult] = Field(default_factory=list)
+    artifacts: dict[str, str] = Field(default_factory=dict)
+    test_results: str = ""
+    score: float = 0.0
+    passed: bool = False
+    total_cost: str = "$0.00"
+    total_tokens: int = 0
+    total_duration_ms: int = 0

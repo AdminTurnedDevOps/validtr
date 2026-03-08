@@ -1,0 +1,8 @@
+./config.go
+./engine.go
+./history.go
+./mcp.go
+./root.go
+./run.go
+./stack.go
+./ui.go
