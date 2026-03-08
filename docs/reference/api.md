@@ -31,3 +31,25 @@ Request fields:
 - `GET /api/mcp/servers`
 - `GET /api/mcp/search?q=...`
 - `GET /api/mcp/servers/{name}`
+
+## API Endpoints Summary
+
+- `GET /health`
+- `GET /api/config/`
+- `GET /api/mcp/servers`
+- `GET /api/mcp/search?q=...`
+- `GET /api/mcp/servers/{name}`
+- `POST /api/run`
+
+## `POST /api/run` Error Mapping
+
+- `400`: invalid provider or other validation errors
+- `401`: authentication-like provider errors
+- `429`: rate limit or permission-like provider errors
+
+## Dry Run Response
+
+When `dry_run=true`, response is:
+
+- `task`: analyzed `TaskDefinition`
+- `recommendation`: full `StackRecommendation`

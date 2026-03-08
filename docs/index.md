@@ -24,3 +24,14 @@ features:
   - title: Test + Score + Retry
     details: Generates tests, computes score, and iterates until threshold or retry limit.
 ---
+
+## Documentation Coverage
+
+This docs site is generated from the current codebase and includes:
+
+- CLI commands, flags, and runtime behavior
+- Engine API contracts and error handling
+- Provider abstraction and model defaults
+- Recommendation, MCP registry, and skills registry internals
+- Docker execution, generated agent loop behavior, and safety guards
+- Test generation, scoring, retry strategy, and current limitations
